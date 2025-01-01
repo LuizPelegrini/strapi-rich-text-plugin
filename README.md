@@ -1,61 +1,96 @@
-# 🚀 Getting started with Strapi
-
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
-
-### `develop`
-
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
-
+1. Create Strapi project (quickstart)
+2. Run
+  ```npx @strapi/sdk-plugin init my-strapi-plugin``` in the strapi root folder to create a local plugin
+3. Answer 'yes' to all prompts, except installing eslint, editorconfig and prettier
+  3.1 Ran into issue:
 ```
-npm run develop
-# or
-yarn develop
+ file:///Users/luiz/.npm/_npx/cd5ad4e6f8ebfd78/node_modules/execa/lib/utils/max-listeners.js:1   │
+│   import {addAbortListener} from 'node:events';                                                             │
+│           ^^^^^^^^^^^^^^^^                                                                                  │
+│   SyntaxError: The requested module 'node:events' does not provide an export named 'addAbortListener'
 ```
-
-### `start`
-
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
-
+4. Proceed with plugin creation:
+```sh
+cd ./src/plugins/my-strapi-plugin
 ```
-npm run start
-# or
-yarn start
+5. Run `npm i`
+6. Ran into dependency resolution error between react 19,`@strapi/icons` and `@strapi/design-system` packages:
+```sh
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR! 
+npm ERR! While resolving: my-strapi-plugin@0.0.0
+npm ERR! Found: react@19.0.0
+npm ERR! node_modules/react
+npm ERR!   dev react@"^19.0.0" from the root project
+npm ERR! 
+npm ERR! Could not resolve dependency:
+npm ERR! peer react@"^17.0.0 || ^18.0.0" from @strapi/icons@2.0.0-rc.14
+npm ERR! node_modules/@strapi/icons
+npm ERR!   @strapi/icons@"^2.0.0-rc.14" from the root project
+npm ERR!   peer @strapi/icons@"^2.0.0 || ^2.0.0-beta || ^2.0.0-alpha" from @strapi/design-system@2.0.0-rc.14
+npm ERR!   node_modules/@strapi/design-system
+npm ERR!     @strapi/design-system@"^2.0.0-rc.14" from the root project
 ```
-
-### `build`
-
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
-
+7. Modify plugin package.json back to react 18:
+```jsonc
+"devDependencies": {
+    "@types/react": "^18", // <<< change from ^19.0.2 to ^18
+    "@types/react-dom": "^18", // <<< change from ^19.0.2 to ^18
+    "react": "^18", // <<< change from ^19.0.0 to ^18
+    "react-dom": "^18", // <<< change from ^19.0.0 to ^18
+  },
 ```
+8. Run `npm i`
+9. Ran into dependency issue between `@strapi/strapi` and `react-router-dom`
+```sh
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR! 
+npm ERR! While resolving: my-strapi-plugin@0.0.0
+npm ERR! Found: react-router-dom@7.1.1
+npm ERR! node_modules/react-router-dom
+npm ERR!   dev react-router-dom@"^7.1.1" from the root project
+npm ERR! 
+npm ERR! Could not resolve dependency:
+npm ERR! peer react-router-dom@"^6.0.0" from @strapi/strapi@5.6.0
+npm ERR! node_modules/@strapi/strapi
+npm ERR!   peer @strapi/strapi@"^5.6.0" from the root project
+```
+10. Remove `@strapi/strapi` from devDependencies and peerDependencies
+11. Run `npm i`
+12. Installation succeeded
+13. Create `Test` component that uses `useStrapiApp` hook:
+  ```jsx
+import { useStrapiApp } from "@strapi/strapi/admin"
+
+export const Test = () => {
+    const components = useStrapiApp('MEDIALIB', (state) => state.components);
+
+    return <h1>Test</h1>
+}
+```
+14. Build plugin
+```sh
 npm run build
-# or
-yarn build
 ```
-
-## ⚙️ Deployment
-
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
-
+15. Navigate back to Strapi project at root
+```sh
+cd ../../..
 ```
-yarn strapi deploy
+16. Register plugin at `<root>/config/plugins.ts`
+```ts
+export default () => ({
+  'my-strapi-plugin': {
+    enabled: true,
+    resolve: './src/plugins/my-strapi-plugin'
+  }
+});
 ```
-
-## 📚 Learn more
-
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
-
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
-
-## ✨ Community
-
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
-
----
-
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+17. Start Strapi in Dev mode
+```sh
+npm run develop
+```
+18. Create new collection-type (e.g Post) and add RichText  (Markdown) - Classic rich text editor field to it
+19. Navigate to Content Manager > Post > + Create New Entry
+20. Error `"MEDIALIB" must be used within "StrapiApp"` is thrown
