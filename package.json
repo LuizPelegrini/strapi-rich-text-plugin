@@ -4,16 +4,17 @@
   "private": true,
   "description": "A Strapi application",
   "scripts": {
-    "build": "strapi build",
+    "build": "npm run build:plugin && strapi build",
+    "build:plugin": "npm run build --workspace=my-strapi-plugin",
     "deploy": "strapi deploy",
     "develop": "strapi develop",
     "start": "strapi start",
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.6.0",
-    "@strapi/plugin-users-permissions": "5.6.0",
-    "@strapi/strapi": "5.6.0",
+    "@strapi/plugin-cloud": "5.7.0",
+    "@strapi/plugin-users-permissions": "5.7.0",
+    "@strapi/strapi": "5.7.0",
     "better-sqlite3": "11.3.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -32,5 +33,9 @@
   },
   "strapi": {
     "uuid": "c276eaeb-3f97-4f58-87e5-5e3fbaa72da0"
-  }
+  },
+  "workspaces": [
+    "my-strapi-plugin",
+    "src/*"
+  ]
 }
